@@ -59,7 +59,7 @@ void setup()
   connectWifi();
 
   client.setServer(serverIPAddress, 1883);
-  //client.setCallback(callback);
+  client.setCallback(callback);
   
   Serial.println("I'm alive");
 }
@@ -91,33 +91,43 @@ void connectWifi() {
   // Connecting to a WiFi network
   Serial.printf("\nConnecting to %s\n", ssid);
   WiFi.begin(ssid, password);
+  
+  boolean current = HIGH;
   while (WiFi.status() != WL_CONNECTED) {
-    delay(250);
     Serial.print(".");
+    BeoButton::updateLed(pcf, TIMER_LED_PIN, current);
+    current = !current;
+    delay(250);
   }
+
+  BeoButton::updateLed(pcf, TIMER_LED_PIN, HIGH);
   Serial.println("");
   Serial.print("WiFi connected on IP address ");
   Serial.println(WiFi.localIP());
 }
 
 void connectMQTT() {
+  String clientId = "BeoEye";
+  boolean current = HIGH;
   
   while (!client.connected()) {
-    
-    String clientId = "BeoEye";
-    Serial.printf("MQTT connecting as client %s...\n", clientId.c_str());
-    
+    Serial.printf("MQTT connecting as client %s...\n", clientId.c_str());  
+      
     if (client.connect(clientId.c_str())) {
       
       Serial.println("MQTT connected");
       client.publish(topic, "Hello from BeoEye");
       // ... and resubscribe
       client.subscribe(topic);
-    } else {
+    }
+    else {
       Serial.printf("MQTT failed, state %s, retrying...\n", client.state());
-      delay(2500);
+      BeoButton::updateLed(pcf, PLAY_LED_PIN, current);
+      current = !current;
+      delay(500);
     }
   }
+  BeoButton::updateLed(pcf, PLAY_LED_PIN, HIGH);
 }
 
 void callback(char *msgTopic, byte *msgPayload, unsigned int msgLength) {
@@ -130,4 +140,19 @@ void callback(char *msgTopic, byte *msgPayload, unsigned int msgLength) {
   message[msgLength] = '\0';
   
   Serial.printf("topic %s, message received: %s\n", topic, message);
+
+  if (strcmp(message, "TIMER.LED.ON") == 0) {
+    Serial.println("TIMER.ON command received");
+    BeoButton::updateLed(pcf, TIMER_LED_PIN, LOW);
+  }
+  else if (strcmp(message, "TIMER.LED.OFF") == 0) {
+    Serial.println("TIMER.OFF command received");
+    BeoButton::updateLed(pcf, TIMER_LED_PIN, HIGH);
+  }
+  else if (strcmp(message, "PLAY.LED.ON") == 0) {
+    BeoButton::updateLed(pcf, PLAY_LED_PIN, LOW);
+  }
+  else if (strcmp(message, "PLAY.LED.OFF") == 0) {
+    BeoButton::updateLed(pcf, PLAY_LED_PIN, HIGH);
+  }
 }
