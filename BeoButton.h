@@ -15,6 +15,8 @@ class BeoButton
 
     void update(PubSubClient &client, PCF8574& pcf, int state);
     void update(PubSubClient &client, int state);
+
+    static void updateLed(PCF8574& pcf, int pin, int state);
     
   private:
     boolean previousState = HIGH;
