@@ -32,8 +32,8 @@
 PCF8574 pcf(DEVICE_ADDRESS);
 
 // Wifi configuration
-const char* ssid = "Grenier";
-const char* password = "geslogeslo";
+const char* ssid = "<ssid>";
+const char* password = "<password>";
 
 // MQTT Configuration
 const IPAddress serverIPAddress(192, 168, 1, 30);
