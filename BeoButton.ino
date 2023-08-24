@@ -6,10 +6,13 @@
  * The code can distinguish between short and long pressed for every button.
  * When buttons PLAY and TIMER are pressed, the LED on the button is enabled.
  * 
+ * Compile for board: LOLIN(WEMOS) D1 R2 & mini
+ * Exceptions: Enabled
+
  * Dependencies:
  * PCF8574 2.3.6
  * PubSubClient 2.8.0
- * 
+ * Multibutton 1.2.0
  */
 
 #include "Arduino.h"
