@@ -59,7 +59,7 @@ void BeoButton::update(PubSubClient &client, int state) {
 
 void BeoButton::publish(PubSubClient &client, String msg) {
   msg.toCharArray(payload, msg.length() + 1);
-  client.publish("beo/eye", payload);
+  client.publish("beo/eye/out", payload);
 }
 
 void BeoButton::updateLed(PCF8574& pcf, int pin, int state) {
