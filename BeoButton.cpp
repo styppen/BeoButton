@@ -12,54 +12,24 @@ BeoButton::BeoButton(String type) {
 }
 
 void BeoButton::update(PubSubClient &client, PCF8574& pcf, int state) {
-  if (state != previousState) {
-
-    if (state == LOW) {
-      pressStart = millis();
-    }
-    else {
-      boolean isShortPress = millis() - pressStart < 300;
-      boolean isLongPress = !isShortPress && millis() - pressStart > 600;
-      
-      if (isShortPress) {
-        pcf.digitalWrite(pin, LOW);
-        publish(client, buttonType + ".SHORT");
-      }
-      else if (isLongPress){
-        pcf.digitalWrite(pin, HIGH);
-        publish(client, buttonType + ".LONG");
-      }
-      Serial.println(buttonType);
-    }
+  mb.update(state == LOW);
+  if(mb.isSingleClick()) {
+    if (buttonType == "PLAY" || buttonType == "TIMER") pcf.digitalWrite(pin, LOW);
+    publish(client, buttonType + ".SHORT");
   }
-  previousState = state;
-}
-
-void BeoButton::update(PubSubClient &client, int state) {
-  if (state != previousState) {
-
-    if (state == LOW) {
-      pressStart = millis();
-    }
-    else {
-      boolean isShortPress = millis() - pressStart < 300;
-      boolean isLongPress = !isShortPress && millis() - pressStart > 600;
-      
-      if (isShortPress) {
-        publish(client, buttonType + ".SHORT");
-      }
-      else if (isLongPress){
-        publish(client, buttonType + ".LONG");
-      }
-      Serial.println(buttonType);
-    }
+  else if (mb.isDoubleClick()) {
+    pcf.digitalWrite(pin, LOW);
+    publish(client, buttonType + ".DOUBLE");
   }
-  previousState = state;
+  else if (mb.isLongClick()) {
+    if (buttonType == "PLAY" || buttonType == "TIMER") pcf.digitalWrite(pin, HIGH);
+    publish(client, buttonType + ".LONG"); 
+  }
 }
 
 void BeoButton::publish(PubSubClient &client, String msg) {
   msg.toCharArray(payload, msg.length() + 1);
-  client.publish("beo/eye", payload);
+  client.publish("beo/eye/out", payload);
 }
 
 void BeoButton::updateLed(PCF8574& pcf, int pin, int state) {

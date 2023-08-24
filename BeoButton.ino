@@ -5,6 +5,14 @@
  * 
  * The code can distinguish between short and long pressed for every button.
  * When buttons PLAY and TIMER are pressed, the LED on the button is enabled.
+ * 
+ * Compile for board: LOLIN(WEMOS) D1 R2 & mini
+ * Exceptions: Enabled
+
+ * Dependencies:
+ * PCF8574 2.3.6
+ * PubSubClient 2.8.0
+ * Multibutton 1.2.0
  */
 
 #include "Arduino.h"
@@ -27,12 +35,13 @@
 PCF8574 pcf(DEVICE_ADDRESS);
 
 // Wifi configuration
-const char* ssid = "<SSID goes here>";
-const char* password = "<password goes here>";
+const char* ssid = "<ssid>";
+const char* password = "<password>";
 
 // MQTT Configuration
-const IPAddress serverIPAddress(192, 168, 1, 2);
-const char *topic = "beo/eye";
+const IPAddress serverIPAddress(192, 168, 1, 30);
+const char *inTopic = "beo/eye/in";
+const char *outTopic = "beo/eye/out";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -79,11 +88,11 @@ void loop()
   uint8_t playVal  = pcf.digitalRead(PLAY_BUTTON_PIN);
 
   btnTimer.update(client, pcf, timerVal);
-  btnUp.update(client, upVal);
-  btnDown.update(client, downVal);
+  btnUp.update(client, pcf, upVal);
+  btnDown.update(client, pcf, downVal);
   btnPlay.update(client, pcf, playVal);
   
-  delay(50);
+  delay(40);
 }
 
 void connectWifi() {
@@ -107,18 +116,18 @@ void connectWifi() {
 }
 
 void connectMQTT() {
-  String clientId = "BeoEye";
+  String clientId = "BeoEye1";
   boolean current = HIGH;
-  
+
   while (!client.connected()) {
     Serial.printf("MQTT connecting as client %s...\n", clientId.c_str());  
       
     if (client.connect(clientId.c_str())) {
       
       Serial.println("MQTT connected");
-      client.publish(topic, "Hello from BeoEye");
+      client.publish(outTopic, "Hello from BeoEye");
       // ... and resubscribe
-      client.subscribe(topic);
+      client.subscribe(inTopic);
     }
     else {
       Serial.printf("MQTT failed, state %s, retrying...\n", client.state());
@@ -139,7 +148,7 @@ void callback(char *msgTopic, byte *msgPayload, unsigned int msgLength) {
   strncpy(message, (char *)msgPayload, msgLength);
   message[msgLength] = '\0';
   
-  Serial.printf("topic %s, message received: %s\n", topic, message);
+  Serial.printf("topic %s, message received: %s\n", msgTopic, message);
 
   if (strcmp(message, "TIMER.LED.ON") == 0) {
     Serial.println("TIMER.ON command received");

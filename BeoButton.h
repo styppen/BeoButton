@@ -6,6 +6,7 @@
 #include "Arduino.h"
 #include "PCF8574.h"
 #include "PubSubClient.h"
+#include "MultiButton.h"
 
 class BeoButton
 {
@@ -14,19 +15,15 @@ class BeoButton
     BeoButton(String type);
 
     void update(PubSubClient &client, PCF8574& pcf, int state);
-    void update(PubSubClient &client, int state);
-
     static void updateLed(PCF8574& pcf, int pin, int state);
     
   private:
-    boolean previousState = HIGH;
-    unsigned long pressStart;
-    int currentState;
     String msg;
     char payload[20];
  
     String buttonType;
     int pin;
+    MultiButton mb;
 
     void publish(PubSubClient &client, String msg);
 };
