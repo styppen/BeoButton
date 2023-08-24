@@ -27,11 +27,11 @@
 PCF8574 pcf(DEVICE_ADDRESS);
 
 // Wifi configuration
-const char* ssid = "<SSID goes here>";
-const char* password = "<password goes here>";
+const char* ssid = "Grenier";
+const char* password = "geslogeslo";
 
 // MQTT Configuration
-const IPAddress serverIPAddress(192, 168, 1, 2);
+const IPAddress serverIPAddress(192, 168, 1, 30);
 const char *topic = "beo/eye";
 
 WiFiClient espClient;
@@ -79,11 +79,11 @@ void loop()
   uint8_t playVal  = pcf.digitalRead(PLAY_BUTTON_PIN);
 
   btnTimer.update(client, pcf, timerVal);
-  btnUp.update(client, upVal);
-  btnDown.update(client, downVal);
+  btnUp.update(client, pcf, upVal);
+  btnDown.update(client, pcf, downVal);
   btnPlay.update(client, pcf, playVal);
   
-  delay(50);
+  delay(40);
 }
 
 void connectWifi() {
@@ -107,9 +107,9 @@ void connectWifi() {
 }
 
 void connectMQTT() {
-  String clientId = "BeoEye";
+  String clientId = "BeoEye1";
   boolean current = HIGH;
-  
+
   while (!client.connected()) {
     Serial.printf("MQTT connecting as client %s...\n", clientId.c_str());  
       
