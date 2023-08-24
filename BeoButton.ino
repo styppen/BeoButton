@@ -85,11 +85,11 @@ void loop()
   uint8_t playVal  = pcf.digitalRead(PLAY_BUTTON_PIN);
 
   btnTimer.update(client, pcf, timerVal);
-  btnUp.update(client, upVal);
-  btnDown.update(client, downVal);
+  btnUp.update(client, pcf, upVal);
+  btnDown.update(client, pcf, downVal);
   btnPlay.update(client, pcf, playVal);
   
-  delay(50);
+  delay(40);
 }
 
 void connectWifi() {
@@ -113,9 +113,9 @@ void connectWifi() {
 }
 
 void connectMQTT() {
-  String clientId = "BeoEye";
+  String clientId = "BeoEye1";
   boolean current = HIGH;
-  
+
   while (!client.connected()) {
     Serial.printf("MQTT connecting as client %s...\n", clientId.c_str());  
       
